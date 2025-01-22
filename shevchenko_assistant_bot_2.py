@@ -11,6 +11,11 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 KOYEB_APP_NAME = os.getenv("KOYEB_APP_NAME")
 
+if not KOYEB_APP_NAME:
+    raise ValueError("Переменная окружения KOYEB_APP_NAME не установлена. Убедитесь, что она задана на Koyeb.")
+
+webhook_url = f"https://{KOYEB_APP_NAME}.koyeb.app/{BOT_TOKEN}"
+
 print(DATABASE_URL, BOT_TOKEN, KOYEB_APP_NAME)
 
 # conn = psycopg2.connect(DATABASE_URL)
@@ -158,12 +163,12 @@ async def end_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-async def set_webhook(application):
-    # Укажите URL вашего приложения на Heroku
-    # webhook_url = f"https://{KOYEB_APP_NAME}.herokuapp.com/{BOT_TOKEN}"
-    webhook_url = f"https://{KOYEB_APP_NAME}.koyeb.app/{BOT_TOKEN}"
+# async def set_webhook(application):
+#     # Укажите URL вашего приложения на Heroku
+#     # webhook_url = f"https://{KOYEB_APP_NAME}.herokuapp.com/{BOT_TOKEN}"
+#     # webhook_url = f"https://{KOYEB_APP_NAME}.koyeb.app/{BOT_TOKEN}"
 
-    await application.bot.set_webhook(webhook_url)
+#     await application.bot.set_webhook(webhook_url)
 
 
 def main():
@@ -192,6 +197,8 @@ def main():
     # Запуск бота
     # application.run_polling()
     PORT = int(os.environ.get("PORT", 8080))
+
+    application.bot.set_webhook(webhook_url)
     
     # Добавьте вызов set_webhook
     application.run_webhook(
