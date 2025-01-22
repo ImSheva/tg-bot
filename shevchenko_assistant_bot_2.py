@@ -204,7 +204,7 @@ def main():
     application.run_webhook(
         listen="0.0.0.0",
         port=PORT,
-        webhook_url=f"https://{os.getenv(KOYEB_APP_NAME)}.koyeb.app/{BOT_TOKEN}",
+        webhook_url=webhook_url
     )
 
 if __name__ == "__main__":
