@@ -198,7 +198,7 @@ def main():
     # application.run_polling()
     PORT = int(os.environ.get("PORT", 8080))
 
-    application.bot.set_webhook(webhook_url)
+    # application.bot.set_webhook(webhook_url)
     
     # Добавьте вызов set_webhook
     application.run_webhook(
