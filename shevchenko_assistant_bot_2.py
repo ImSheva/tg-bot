@@ -14,9 +14,17 @@ KOYEB_APP_NAME = os.getenv("KOYEB_APP_NAME")
 if not KOYEB_APP_NAME:
     raise ValueError("Переменная окружения KOYEB_APP_NAME не установлена. Убедитесь, что она задана на Koyeb.")
 
+from psycopg2 import pool
+
+db_pool = None
+
 def initialize_database():
+    global db_pool
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        db_pool = psycopg2.pool.SimpleConnectionPool(
+            1, 20, DATABASE_URL  # Минимум 1, максимум 20 соединений
+        )
+        conn = db_pool.getconn()
         cursor = conn.cursor()
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS applications (
@@ -31,10 +39,33 @@ def initialize_database():
         """)
         conn.commit()
         cursor.close()
-        conn.close()
+        db_pool.putconn(conn)
     except Exception as e:
         print(f"Ошибка инициализации базы данных: {e}")
         exit(1)
+
+
+# def initialize_database():
+#     try:
+#         conn = psycopg2.connect(DATABASE_URL)
+#         cursor = conn.cursor()
+#         cursor.execute("""
+#         CREATE TABLE IF NOT EXISTS applications (
+#             id SERIAL PRIMARY KEY,
+#             role TEXT,
+#             sales_team TEXT,
+#             requests TEXT,
+#             name TEXT,
+#             phone TEXT,
+#             email TEXT
+#         );
+#         """)
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
+#     except Exception as e:
+#         print(f"Ошибка инициализации базы данных: {e}")
+#         exit(1)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -143,6 +174,7 @@ async def end_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
+    initialize_database()
     application = Application.builder().token(BOT_TOKEN).build()
 
     conv_handler = ConversationHandler(
